@@ -33,12 +33,17 @@ int main(){
 
 	}
 
-	while (jugador[2] < 3 && maquina[2] < 3 ){
+	int bool1 = jugador[2] < 3 && maquina[2] < 3;
+	int bool2 = jugador[3] == 1 && maquina[3] == 1;
+
+	while (bool1 && !bool2){
 		if (!jugador[3]){
+			printf("TURNO: Jugador\n");
 			movimiento_jugador(jugador, num, tablero);
 		}
 
-		if (!jugador[3] && jugador[2] != 3){
+		if (!maquina[3] && jugador[2] != 3){
+			printf("TURNO: Maquina\n");
 			movimiento_maquina(maquina, num, tablero);
 		}
 	}
@@ -100,7 +105,6 @@ void movimiento_jugador(int *jugador, int num, int *tablero){
 	int mov_valido = 0;
 
 	while (!mov_valido){
-		printf("TURNO: Jugador\n");
 		printf("Ingrese el numero de casillas a mover (1 - 6): ");
 		scanf("%d", &pasos);
 
@@ -155,7 +159,6 @@ void movimiento_maquina(int *maquina, int num, int *tablero){
         int mov_valido = 0;
 
         while (!mov_valido){
-                printf("TURNO: Maquina\n");
 		pasos = n_aleatorio(1,6);
 
                 if (maquina[0] + pasos <= num){
