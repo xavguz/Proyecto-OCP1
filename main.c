@@ -1,5 +1,3 @@
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -10,8 +8,12 @@ void fill_arr(int num, int tesoros, int *p_arr);
 int n_aleatorio(int min, int max);
 void movimiento_jugador(int *jugador, int num, int *tablero);
 void movimiento_maquina(int *maquina, int num, int *tablero);
+int partida(int *jugador, int *maquina);
+void robo(int *ganador, int *perdedor);
+void mostrar_datos(int *pj, int dinero_o);
 
 int main(){
+
 	srand(time(NULL));
 
 	int tablero[119];
@@ -23,20 +25,18 @@ int main(){
 	int jugador[] = {0,0,0,0};
 	int maquina[] = {0,0,0,0};
 
-
 	num_casillas(p_num);
 	tesoros = calc_avg(num);
 	fill_arr(num, tesoros, tablero);
 
+	/* imprime tablero
 	for (int i = 0; i < num; i++){
 		printf("%d.\t%d\n",i + 1 ,tablero[i]);
 
 	}
+	*/
 
-	int bool1 = jugador[2] < 3 && maquina[2] < 3;
-	int bool2 = jugador[3] == 1 && maquina[3] == 1;
-
-	while (bool1 && !bool2){
+	while (partida(jugador, maquina)){
 		if (!jugador[3]){
 			printf("TURNO: Jugador\n");
 			movimiento_jugador(jugador, num, tablero);
@@ -50,23 +50,54 @@ int main(){
 
 	printf("La partida termino\n");
 
+	if (maquina[2] == 3) {
+		robo(maquina,jugador);
+		printf("GANADOR: MAQUINA\tDinero acumulado: %d\tTesoros: %d\n",maquina[1], maquina[2]);
+		printf("PERDEDOR: JUGADOR\tDinero acumulado: %d\tTesoros: %d\n",jugador[1], jugador[2]);
+	}
+
+	else if (jugador[2] == 3){
+                robo(jugador,maquina);
+                printf("GANADOR: JUGADOR\tDinero acumulado: %d\tTesoros: %d\n",jugador[1],jugador[2]);
+                printf("PERDEDOR: MAQUINA\tDinero acumulado: %d\tTesoros: %d\n",maquina[1],maquina[2]);
+        }
+
+	else if (maquina[1] > jugador[1]){
+		robo(maquina, jugador);
+		printf("GANADOR: MAQUINA\tDinero acumulado: %d\tTesoros: %d\n",maquina[1],maquina[2]);
+		printf("PERDEDOR: JUGADOR\tDinero acumulado: %d\tTesoros: %d\n",jugador[1], jugador[2]);
+	}
+
+	else if (maquina[1] < jugador[1]){
+		robo(jugador,maquina);
+		printf("GANADOR: JUGADOR\tDinero acumulado: %d\tTesoros: %d\n",jugador[1],jugador[2]);
+		printf("PERDEDOR: MAQUINA\tDinero acumulado: %d\tTesoros: %d\n",maquina[1],maquina[2]);
+	}
+
 	return 0;
 }
 
 void num_casillas(int *num){
-	printf("Ingrese el numero de casillas: ");
-	scanf("%d", num);
+	int n_valido = 0;
 
-	if (*num < 20 || *num > 120){
-		printf("Ingresar numero valido (20 - 120)\n");
-		num_casillas(num);
+	while (!n_valido){
+		printf("Ingrese el numero de casillas: ");
+	        scanf("%d", num);
+
+		if ( !(*num < 20 || *num > 120 )){
+			n_valido = 1;
+		}
+		else {
+			printf("Ingresar numero valido (20 - 120)\n");
+		}
 	}
 }
 
 
 int calc_avg(int num){
 	int avg = (30*num)/100;
-	printf("El numero de tesoros en la partida (%d)\n",avg);
+	printf("El numero de tesoros en la partida (%d)\n\n",avg);
+
 	return avg;
 }
 
@@ -133,7 +164,7 @@ void movimiento_jugador(int *jugador, int num, int *tablero){
 		dinero_obtenido = 0;
 	}
 
-	else { 
+	else {
                 dinero_obtenido = tablero[pos_actual -1];
         }
 
@@ -144,14 +175,16 @@ void movimiento_jugador(int *jugador, int num, int *tablero){
 	}
 
 	else {
-		printf("El jugador se movio %d casillas, su posicion actual es %d\n", pasos, pos_actual);
+		printf("El jugador se movio %d casillas, su posicion actual es %d\n\n", pasos, pos_actual);
 	}
 
 	jugador[1] += dinero_obtenido;
-
+	/*
 	printf("Tesoros: %d\n", jugador[2]);
 	printf("Dinero obtenido: %d\n", dinero_obtenido);
 	printf("Dinero acumulado: %d\n\n", jugador[1]);
+	*/
+	mostrar_datos(jugador, dinero_obtenido);
 }
 
 void movimiento_maquina(int *maquina, int num, int *tablero){
@@ -175,7 +208,7 @@ void movimiento_maquina(int *maquina, int num, int *tablero){
                 printf("Encontro tesoro +1!\n");
 		dinero_obtenido = 0;
                 maquina[2]++;
-        } 
+        }
 
 	else {
 		dinero_obtenido = tablero[pos_actual -1];
@@ -186,15 +219,39 @@ void movimiento_maquina(int *maquina, int num, int *tablero){
                 printf("La maquina se movio %d casillas, llego a la meta!\n",pasos);
         }
 
-        else { 
-                printf("La maquina se movio %d casillas, su posicion actual es %d\n", pasos, pos_actual);
+        else {
+                printf("La maquina se movio %d casillas, su posicion actual es %d\n\n", pasos, pos_actual);
         }
 
         maquina[1] += dinero_obtenido;
 
+	/*
         printf("Tesoros: %d\n", maquina[2]);
         printf("Dinero obtenido: %d\n", dinero_obtenido);
         printf("Dinero acumulado: %d\n\n", maquina[1]);
+	*/
+
+	mostrar_datos(maquina, dinero_obtenido);
 }
 
+int partida(int *jugador, int *maquina){
+	int bool1 = jugador[2] < 3 && maquina[2] < 3;
+        int bool2 = jugador[3] == 1 && maquina[3] == 1;
 
+	return bool1 && !(bool2);
+}
+
+void robo(int *ganador, int *perdedor){
+
+	int monto_robado = perdedor[1];
+	perdedor[1] = 0;
+
+	ganador[1] += monto_robado;
+
+	printf("Se robo %d dinero\n",monto_robado);
+}
+
+void mostrar_datos(int *pj, int dinero_o){
+	printf("Dinero obtenido: %d\tDinero acumulado: %d\tTesoros: %d\n\n",dinero_o, pj[1], pj[2]);
+
+}
